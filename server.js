@@ -1,7 +1,8 @@
 const express =require("express")
 require("dotenv").config();
 const userRouter = require("./routes/users")
-const itemRouter = require("./routes/itemRoute")
+const itemRouter = require("./routes/itemRoute");
+const roleRouter = require("./routes/roleRoute");
 const app =express()
 
 require("./models/db")
@@ -15,6 +16,7 @@ app.use(express.json())
 
 app.use("/users",userRouter)
 app.use("/items",itemRouter)
+app.use("/roles",roleRouter)
 
 
 
