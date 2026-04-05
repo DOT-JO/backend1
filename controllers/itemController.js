@@ -1,20 +1,29 @@
 
 const Item = require("../models/itemSchema")
+const Cat=require("../models/CategorySchema")
 const mongoose =require("mongoose")
 
 const createItem = async (req, res) => {
 
     try {
 
-        const { name, category, image } = req.body;
-        if (!name || !category) {
+        const { name_ar,name_en,category,price,variants } = req.body;
+
+           const image = req.file ? req.file.path : null;
+           const parsedVariants = JSON.parse(variants);
+
+        if (!name_ar ||!name_en|| !category||!variants || variants.length === 0) {
             return res.status(400).json({
-                message: "name , category are required"
+                message: "name , category and variants are required"
             })
 
         }
 
-        const existItem = await Item.findOne({ name })
+        console.log("Category",category)
+        
+        const existItem = await Item.findOne({name_ar})
+      
+
 
         if (existItem) {
             return res.status(409).json({
@@ -22,16 +31,29 @@ const createItem = async (req, res) => {
             })
         }
 
+        const catDeatails= await Cat.findOne({name_ar:category})
+        if(!catDeatails){
+        return res.status(404).json({
 
-
-
-        const newItem = await Item.create({
-
-            name,
-            category,
-            image
+            message:" cat not Found "
 
         })
+    }
+
+console.log("catDeatails",catDeatails._id)
+        const newItem = await Item.create({
+
+            name_ar,
+            name_en,
+            price,
+            category : catDeatails._id,
+            image,
+            variants:parsedVariants
+
+
+        })
+
+        console.log("new item",newItem)
 
         res.status(201).json({
             message: "new item was created sucessfully",
@@ -43,7 +65,8 @@ const createItem = async (req, res) => {
     } catch (error) {
 
         res.status(500).json({
-            message: "server error"
+            message: "server error",
+            error:error.message
         })
 
 
@@ -58,6 +81,7 @@ const getAllItems = async (req, res) => {
         // const items = await Item.find().select("").limit(0)
 
         const items = await Item.find({isDeleted:false})
+       
         res.status(200).json({
             message: "All items was fetching",
             data: items
@@ -368,8 +392,21 @@ const softDelete =async(req,res)=>{
 
 }
 
+const getItemsByCat =async(req,res)=>{
 
+    const {categoryId} =req.params
 
+     try {
+    const items = await Item.find({ category:categoryId });
+    res.status(200).json({ 
+        message:"fetching all cat items",
+        data: items 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+
+}
 
 
 
@@ -383,5 +420,6 @@ module.exports = {
     updateOneItem,
     updateItemBasedId,
     hardDeleted,
-    softDelete
+    softDelete,
+    getItemsByCat
 }
