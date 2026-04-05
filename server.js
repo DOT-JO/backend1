@@ -11,9 +11,9 @@ const app =express()
 
 require("./models/db")
 const PORT =8001
-app.use(cors(
- {   origin:"http://localhost:5173"}
-))
+app.use(cors({
+  origin: 'https://iridescent-concha-fe4e6f.netlify.app'
+}))
 app.use(express.json())
 
 
